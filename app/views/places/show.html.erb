@@ -1,0 +1,108 @@
+<p id="notice"><%= notice %></p>
+<%= form_for(@place) do |f| %>
+  <% if @place.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@place.errors.count, "error") %> prohibited this place from being saved:</h2>
+
+      <ul>
+      <% @place.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<p>
+  <b>Name:</b>
+  <%= @place.name %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @place.status %>
+</p>
+
+<p>
+  <b>Lat:</b>
+  <%= @place.lat %>
+</p>
+
+<p>
+  <b>Long:</b>
+  <%= @place.long %>
+</p>
+
+<%= link_to 'Edit', edit_place_path(@place) %> |
+<%= link_to 'Back', places_path %>
+
+<br />
+<script>
+
+  var gMap2 = new GMap2();
+
+  function mapClick(gMarker, gLatLng) {
+    if (gMarker) {
+      displayMarkerPosition(gMarker);
+    } else if (gLatLng) {
+      createLocationMarker(gLatLng);
+    }
+  }
+
+  function createLocationMarker(gLatLng) {
+    var gMarker = new GMarker(gLatLng, {draggable: true, bouncy: true});
+    gMap2.addOverlay(gMarker);
+
+    displayMarkerPosition(gMarker);
+
+    GEvent.addListener(gMarker, "dragstart", closeMapInfoWindow);
+
+    GEvent.addListener(gMarker, "dragend", function() {
+      displayMarkerPosition(gMarker);
+    });
+  }
+
+  function closeMapInfoWindow() {
+    gMap2.closeInfoWindow();
+  }
+
+  function displayMarkerPosition(gMarker) {
+    GAsync(gMarker, 'getPoint', gMap2, 'getBounds', 'getSize', function(gLatLng, gLatLngBounds, gSize) {
+      gMarker.openInfoWindowHtml(gpsString(gLatLng, gLatLngBounds, gSize));
+    });
+  }
+
+  function gpsString(gLatLng, gLatLngBounds, gSize) {
+    var ne = gLatLngBounds.getNorthEast();
+    var sw = gLatLngBounds.getSouthWest();
+
+    var degreesPerPixel = (ne.lat() - sw.lat()) / gSize.height;
+    var goodDigits = Math.ceil(- Math.log(degreesPerPixel) / Math.log(10))
+ 
+    var roundedLatLng = roundGLatLng(gLatLng, goodDigits);
+ 
+    return "GPS: " + roundedLatLng.lat() + ", " + roundedLatLng.lng();
+  }
+
+  function roundGLatLng(gLatLng, goodDigits) {
+    return new GLatLng(roundNumber(gLatLng.lat(), goodDigits), roundNumber(gLatLng.lng(), goodDigits));
+  }
+
+  function roundNumber(number, goodDigits) {
+    var power = Math.pow(10, Math.ceil(goodDigits));
+    return Math.round(number * power) / power;
+  }
+
+  GEvent.addListener(gMap2, "click", mapClick);
+
+</script>
+<iframe width="425" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Cebu+City,+Philippines&amp;aq=0&amp;sll=37.370157,-95.712891&amp;sspn=28.922657,86.572266&amp;ie=UTF8&amp;hq=&amp;hnear=Cebu+City,+Cebu,+Central+Visayas,+Philippines&amp;z=11&amp;ll=10.359189,123.863454&amp;output=embed"></iframe><br /><small><a href="http://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=Cebu+City,+Philippines&amp;aq=0&amp;sll=37.370157,-95.712891&amp;sspn=28.922657,86.572266&amp;ie=UTF8&amp;hq=&amp;hnear=Cebu+City,+Cebu,+Central+Visayas,+Philippines&amp;z=11&amp;ll=10.359189,123.863454" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+
